@@ -1,7 +1,6 @@
 import { Geist,Geist_Mono} from "next/font/google";
 import "./globals.css";
-import AuthProvider from "./context/AuthContext";
-import Login from "./components/Login";
+import ChildLayout from "./ChildLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +24,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
-        <AuthProvider>
+        <ChildLayout>
           {children}
-        </AuthProvider>
+        </ChildLayout>        
       </body>
     </html>
   );

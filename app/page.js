@@ -1,17 +1,20 @@
 "use client"
 import Image from "next/image";
-import React,{useContext} from "react";
+import React,{useState,useContext, useEffect} from "react";
 import { AuthContext } from "./context/AuthContext";
-import Login from "./components/Login";
+import Mnemonic from "./components/Mnemonic";
 
 export default function Home() {
-  const{token}=useContext(AuthContext)
-  if(!token){
-    return <Login />
-  }
+  const{userData}=useContext(AuthContext)
+  const[hasSeed,setHasSeed]=useState(false)
+  useEffect(()=>{
+    if(userData){
+      setHasSeed(userData?.user?.hasSeed)
+    }
+  },[])
   return (
     <div>
-      
+      {!hasSeed&&<Mnemonic />}
     </div>
   );
 }

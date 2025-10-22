@@ -27,7 +27,7 @@ export async function POST(request) {
     }
 
     // Find user
-    const user = await User.findOne({ username: username.toLowerCase() }).select("password");
+    const user = await User.findOne({ username: username }).select("+password");
 
     if (!user) {
       return NextResponse.json(
@@ -38,7 +38,6 @@ export async function POST(request) {
         { status: 401 }
       );
     }
-    console.log(user)
 
     // Compare password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -62,12 +61,14 @@ export async function POST(request) {
       JWT_SECRET,
       { expiresIn: '7d' }
     );
+    console.log(user)
 
     // Prepare user response (exclude password)
     const userResponse = {
       _id: user._id,
       username: user.username,
       walletCounters: user.walletCounters,
+      hasSeed:user.hasSeedPhrase,
       createdAt: user.createdAt,
     };
 

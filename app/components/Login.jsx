@@ -9,7 +9,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const{setToken}=useContext(AuthContext)
+  const{setUserData}=useContext(AuthContext)
 
   const switchMode = () => {
     setIsLogin(!isLogin);
@@ -48,7 +48,7 @@ export default function Login() {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
+      const data = await response.json()  ;
 
       if (!response.ok) {
         throw new Error(data.message || `${isLogin ? 'Login' : 'Registration'} failed`);
@@ -56,11 +56,9 @@ export default function Login() {
 
       if (isLogin) {
         setSuccess('Login successful! Redirecting...');
-        localStorage.setItem('token', data.token);
-        setToken(data.token);
-        // setTimeout(() => {
-        //   window.location.href = '/';
-        // }, 1000);
+        const filteredData={token:data.token,user:data.user}
+        localStorage.setItem('userData', JSON.stringify(filteredData));
+        setUserData(filteredData);
       } else {
         setSuccess('Registration successful! You can now login.');
         setTimeout(() => {

@@ -30,7 +30,11 @@ const userSchema=new mongoose.Schema({
     },
     seedPhrase:{
         type:String,
-        select:false
+        select:false,
+    },
+    hasSeedPhrase:{
+        type:Boolean,
+        default:false
     },
     createdAt: {
     type: Date,

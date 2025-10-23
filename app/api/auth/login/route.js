@@ -4,15 +4,12 @@ import jwt from 'jsonwebtoken';
 import { connectDB } from '../../../lib/mongodb';
 import User from '../../../models/UserModal';
 
-// JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function POST(request) {
   try {
-    // Connect to database
     await connectDB();
 
-    // Get request body
     const { username, password } = await request.json();
 
     // Validation

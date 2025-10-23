@@ -1,6 +1,7 @@
+"use server"
 import { generateMnemonic,mnemonicToSeedSync } from "bip39";
 
-export default function(){
+export async function getMnemonic(){
     const mnemonic=generateMnemonic();
     const seed=mnemonicToSeedSync(mnemonic);
     //store seed in mongodb

@@ -1,87 +1,41 @@
-import React from "react";
+"use client";
 
-/**
- * Full‑screen fixed overlay that shows 12 mnemonic words (3 per row),
- * offers a Copy action, and an "Add Wallet" button.
- *
- * Usage:
- * <MnemonicOverlay words={[...12 words...]} onAddWallet={() => {}} />
- */
-export default function Mnemonic({
-  words = [
-    "ribbon",
-    "below",
-    "matrix",
-    "globe",
-    "sunset",
-    "coffee",
-    "velvet",
-    "cattle",
-    "harbor",
-    "anchor",
-    "planet",
-    "ancient",
-  ],
-  onAddWallet,
-}) {
-  const [copied, setCopied] = React.useState(false);
-  const wordList = Array.isArray(words) ? words.slice(0, 12) : [];
+import { useState, useTransition } from "react";
+import {getMnemonic} from "../lib/serveractions/getMnemonic";
+import DisplayMnemonic from "./DisplayMnemonic";
 
-  const copyAll = async () => {
-    try {
-      await navigator.clipboard.writeText(wordList.join(" "));
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch (e) {
-      console.error("Copy failed", e);
-      alert("Copy failed. Please copy manually.");
-    }
+export default function MnemonicPrompt() {
+  const [mnemonic, setMnemonic] = useState(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleGenerate = () => {
+    startTransition(async () => {
+      const result = await getMnemonic();
+      setMnemonic(result);
+    });
   };
 
+  if (mnemonic) {
+    return <DisplayMnemonic words={mnemonic} />;
+  }
+
   return (
-    <div className="fixed inset-0 z-[99999] bg-black text-white">
-      <div className="mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-6 p-6">
-        {/* Header + Copy */}
-        <div className="flex w-full items-center justify-between">
-          <h1 className="text-xl font-semibold tracking-wide">Your Recovery Phrase</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={copyAll}
-              className="rounded-2xl border border-white/40 px-4 py-2 text-sm font-medium hover:border-white focus:outline-none focus:ring-2 focus:ring-white/60"
-              aria-live="polite"
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          </div>
-        </div>
-
-        {/* Grid of 12 words: 3 per row */}
-        <div className="grid w-full grid-cols-3 gap-4">
-          {wordList.map((w, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between rounded-2xl border border-white/20 px-4 py-3 text-base"
-            >
-              <span className="opacity-70 mr-3 tabular-nums">{i + 1}.</span>
-              <span className="flex-1 select-text text-center font-medium">{w}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer actions */}
-        <div className="mt-2 flex w-full items-center justify-end gap-3">
-          <button
-            onClick={onAddWallet}
-            className="rounded-2xl border border-white px-5 py-2.5 text-sm font-semibold hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/60"
-          >
-            Add Wallet
-          </button>
-        </div>
-
-        {/* Security note (optional, still white on black) */}
-        <p className="mt-2 text-center text-xs opacity-60">
-          Never share this phrase. Anyone with it can access your wallet.
+    <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className=" text-white rounded-2xl shadow-lg p-8 w-96 text-center border-2 border-white">
+        <h2 className="text-lg font-semibold mb-4">
+          Generate Your Mnemonic
+        </h2>
+        <p className="text-sm text-gray-300 mb-6">
+          This mnemonic phrase will be used to create your wallet. Make sure to
+          store it safely.
         </p>
+        <button
+          onClick={handleGenerate}
+          disabled={isPending}
+          className="px-6 py-2 border border-white bg-black text-white rounded-lg hover:bg-gray-900 transition-all"
+        >
+          {isPending ? "Generating..." : "Generate Mnemonic"}
+        </button>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { connectDB } from '../../../lib/mongodb';
 import User from '../../../models/UserModal';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(request) {
   try {
@@ -53,28 +53,18 @@ export async function POST(request) {
     const token = jwt.sign(
       {
         userId: user._id.toString(),
-        username: user.username,
       },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
-    console.log(user)
 
     // Prepare user response (exclude password)
-    const userResponse = {
-      _id: user._id,
-      username: user.username,
-      walletCounters: user.walletCounters,
-      hasSeed:user.hasSeedPhrase,
-      createdAt: user.createdAt,
-    };
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Login successful',
-        token,
-        user: userResponse,
+        token:token,
+        hasSeed:user.hasSeedPhrase,
       },
       { status: 200 }
     );

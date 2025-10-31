@@ -56,7 +56,7 @@ export default function Login() {
 
       if (isLogin) {
         setSuccess('Login successful! Redirecting...');
-        const filteredData={token:data.token,user:data.user}
+        const filteredData={token:data.token,hasSeed:data.hasSeed}
         localStorage.setItem('userData', JSON.stringify(filteredData));
         setUserData(filteredData);
       } else {

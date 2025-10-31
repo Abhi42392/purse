@@ -9,12 +9,15 @@ export default function Home() {
   const[hasSeed,setHasSeed]=useState(false)
   useEffect(()=>{
     if(userData){
-      setHasSeed(userData?.user?.hasSeed)
+      setHasSeed(userData.hasSeed)
     }
   },[])
+  if(!hasSeed){
+    return <Mnemonic />
+  }
   return (
-    <div>
-      {!hasSeed&&<Mnemonic />}
+    <div className="text-white">
+      Home
     </div>
   );
 }

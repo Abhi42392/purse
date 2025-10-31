@@ -3,7 +3,6 @@ import React from "react";
 export default function DisplayMnemonic({words}) {
   const [copied, setCopied] = React.useState(false);
   const wordList = words.split(" ")
-  console.log(wordList)
 
   const copyAll = async () => {
     try {
@@ -49,12 +48,12 @@ export default function DisplayMnemonic({words}) {
 
         {/* Footer actions */}
         <div className="mt-2 flex w-full items-center justify-end gap-3">
-          <button
-           
+          <Link
+           href="/add-wallet"
             className="rounded-2xl border border-white px-5 py-2.5 text-sm font-semibold hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/60"
           >
             Add Wallet
-          </button>
+          </Link>
         </div>
 
         {/* Security note (optional, still white on black) */}

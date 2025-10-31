@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Web3Wallet",
+  title: "Purse",
   description: "Wallet for all crypto currencies",
 };
 

@@ -1,26 +1,44 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import {getMnemonic} from "../lib/serveractions/getMnemonic";
+import { useContext, useState, useTransition } from "react";
 import DisplayMnemonic from "./DisplayMnemonic";
+import { AuthContext } from "../context/AuthContext";
 
 export default function MnemonicPrompt() {
   const [mnemonic, setMnemonic] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const{userData,setUserData}=useContext(AuthContext)
 
   const handleGenerate = () => {
     startTransition(async () => {
-      const result = await getMnemonic();
-      setMnemonic(result);
+      try {
+        const token=userData.token
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/generate-seed`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }, 
+        });
+        const result=await response.json();
+        if(result.success){
+          
+        }else{
+          throw new Error(result.error)
+        }
+      } catch (err) {
+        console.error("Request failed:", err);
+      }
     });
   };
+
 
   if (mnemonic) {
     return <DisplayMnemonic words={mnemonic} />;
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center  backdrop-blur-sm">
       <div className=" text-white rounded-2xl shadow-lg p-8 w-96 text-center border-2 border-white">
         <h2 className="text-lg font-semibold mb-4">
           Generate Your Mnemonic

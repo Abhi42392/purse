@@ -5,18 +5,17 @@ export const AuthContext=createContext();
 
 const AuthProvider = ({children}) => {
     const[userData,setUserData]=useState(null);
-    const[loading,setLoading]=useState(false)
+    const[loading,setLoading]=useState(true)
     useEffect(()=>{
+        setLoading(true)
         const storedUserData=localStorage.getItem("userData");
         if(storedUserData){
-            setUserData(storedUserData)
+            setUserData(JSON.parse(storedUserData))
         }
+        setLoading(false)
     },[])
     const logout = () => {
       localStorage.removeItem('userData');
-      if (userData) {
-        localStorage.removeItem(`userData`);
-      }
       setUserData(null);
     };
   return (

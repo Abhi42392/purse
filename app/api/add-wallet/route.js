@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { verifyToken } from '@/app/lib/serveractions/verifyToken';
+import Wallet from '@/app/models/WalletModal';
 import User from '@/app/models/UserModal';
 import { connectDB } from '@/app/lib/mongodb';
-import { getSolanaKeypair } from '../../lib/serveractions/SolanaWallet'; // assuming you have this helper
+import { getSolanaKeypair } from '../../lib/serveractions/SolanaWallet'; 
 
-// ✅ Helper function to extract token
 function getToken(req) {
   const auth = req.headers.get('authorization');
   if (auth && auth.startsWith('Bearer ')) {
@@ -18,6 +18,7 @@ export async function POST(req) {
     await connectDB();
 
     const { wallet_name, wallet_type } = await req.json();
+
 
     const token = getToken(req);
     if (!token) {
@@ -38,7 +39,7 @@ export async function POST(req) {
     const userId = verification.data;
 
     // ✅ Find user
-    const user_data = await User.findById(userId);
+    const user_data = await User.findById(userId).select("+seedPhrase");
 
     if (!user_data) {
       console.log("User not found")
@@ -47,7 +48,7 @@ export async function POST(req) {
         { status: 404 }
       );
     }
-
+    console.log(user_data)
     const seed = user_data.seedPhrase;
     if (!seed) {
       console.log("Generate Mnemonic first")
@@ -57,11 +58,7 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Generate new wallet
-    let new_wallet = {
-      name: wallet_name,
-      walletType: wallet_type,
-    };
+    let new_wallet = {};
 
     if (wallet_type === 'solana') {
       const solana_wallet_number = user_data.walletCounter.solana + 1;
@@ -78,13 +75,20 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
-    console.log('New wallet:', new_wallet);
-
-    // ✅ Insert into DB (optional)
-    // await Wallet.create(new_wallet);
-
-
+    const res=new Wallet({
+      userId:userId,
+      privateKey:new_wallet.privateKey,
+      publicKey:new_wallet.publicKey,
+      name:wallet_name,
+      walletType:wallet_type
+    })
+    await res.save();
+    await User.findByIdAndUpdate(userId,{
+      "$inc":{
+        totalWallets:1,
+        [`walletCounter.${wallet_type}`]:1
+      }
+    })
     return NextResponse.json({
       success: true,
       message: 'New wallet created successfully',

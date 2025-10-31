@@ -13,6 +13,12 @@ const walletSchema=new mongoose.Schema({
         enum:["solana","ethereum"],
         index:true
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', 
+        required: true
+    },
+
     privateKey:{
         type:String,
         required:true,

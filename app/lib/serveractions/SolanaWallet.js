@@ -5,10 +5,10 @@ import bs58 from "bs58";
 
 export function getSolanaKeypair(seed, derivationPath) {
     // Convert seed to hex string if it's a Buffer
-    const seedHex = Buffer.isBuffer(seed) ? seed.toString("hex") : seed;
+    //const seedHex = Buffer.isBuffer(seed) ? seed.toString("hex") : seed;
     
     // Derive the seed using the derivation path
-    const derivedSeed = derivePath(derivationPath, seedHex).key;
+    const derivedSeed = derivePath(derivationPath, seed).key;
     
     // Generate the secret key from the derived seed
     const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;

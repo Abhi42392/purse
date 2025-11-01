@@ -22,7 +22,10 @@ export default function MnemonicPrompt() {
         });
         const result=await response.json();
         if(result.success){
-          
+          console.log(result.data.mnemonic)
+          setMnemonic(result.data.mnemonic);
+          // setUserData({...userData,hasSeed:true})
+          localStorage.setItem('userData',JSON.stringify({...userData,hasSeed:true}))
         }else{
           throw new Error(result.error)
         }

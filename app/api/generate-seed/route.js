@@ -22,8 +22,10 @@ export async function POST(req){
               );
             }
             console.log("Token "+token)
+
         const verification = await verifyToken(token);
             if (!verification.success) {
+              console.log(verification.error)
               return NextResponse.json(
                 { error: verification.error },
                 { status: 401 }
@@ -32,11 +34,12 @@ export async function POST(req){
           
         const userId = verification.data;
         const mnemonic=generateMnemonic();
-        const seed=mnemonicToSeedSync(mnemonic);
+        const seed=mnemonicToSeedSync(mnemonic);//Buffer type
+        const seedHex=seed.toString("hex")
         
         await User.findByIdAndUpdate(
             userId,
-            { seedPhrase: seed, hasSeedPhrase: true },
+            { seedPhrase: seedHex, hasSeedPhrase: true,mnemonic:mnemonic },
             {new:true}
         );
 

@@ -1,12 +1,15 @@
 import { HDNodeWallet,Wallet } from "ethers";
 
 export function deriveEtheriumWallet(seed,derivationPath){
-    const privateKey=deriveEtheriumPrivateKey(seed,derivationPath);
-    return new Wallet(privateKey);
+    const seedBuffer = Buffer.from(seed, "hex");
+    const hdNode=HDNodeWallet.fromSeed(seedBuffer);
+    const child=hdNode.derivePath(derivationPath)
+    return {publicKey:child.publicKey,privateKey:child.privateKey};
 }
 
 export function deriveEtheriumPrivateKey(seed,derivationPath){
-    const hdnode=HDNodeWallet.fromSeed(seed);
+    const seedBuffer = Buffer.from(seed, "hex");
+    const hdnode=HDNodeWallet.fromSeed(seedBuffer);
     const child=hdnode.derivePath(derivationPath);
     return child.privateKey;
 }

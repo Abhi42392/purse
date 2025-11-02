@@ -4,10 +4,10 @@ import { AuthContext } from "../context/AuthContext";
 const Logout = () => {
   const { logout } = useContext(AuthContext);
   return (
-    <div className="absolute bottom-2 right-2">
+    <div className="">
       <button
         onClick={logout}
-        className="bg-white py-1 px-4 cursor-pointer rounded-md"
+        className="bg-white text-black cursor-pointer rounded-md sm:px-4 sm:py-2 py-1 px-2"
       >
         Logout
       </button>

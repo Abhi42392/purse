@@ -1,19 +1,19 @@
 "use client";
 import React, { useState, useEffect, useContext } from "react";
-import { Eye, EyeOff, Plus, Wallet, Copy, Check } from "lucide-react";
+import { Plus, Wallet, Copy, Check } from "lucide-react";
 import { AuthContext } from "./context/AuthContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Loading from "./components/Loading";
+import Logout from "./components/Logout";
 
 export default function Home() {
   const [wallets, setWallets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [visibleKeys, setVisibleKeys] = useState({});
-  const [passwordInputs, setPasswordInputs] = useState({});
   const [copiedStates, setCopiedStates] = useState({});
-  const [verifyingPassword, setVerifyingPassword] = useState({});
   const { userData } = useContext(AuthContext);
+  const router = useRouter();
 
   useEffect(() => {
     fetchWalletInfo();
@@ -45,72 +45,13 @@ export default function Home() {
     }
   };
 
-  const handlePasswordSubmit = async (walletId, password) => {
-    try {
-      setVerifyingPassword((prev) => ({ ...prev, [walletId]: true }));
-      console.log("front: " + walletId, password);
-
-      const response = await fetch("/api/show-private-key", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userData.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ walletId, password }),
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setWallets((prev) =>
-          prev.map((wallet) =>
-            wallet._id === walletId
-              ? { ...wallet, privateKey: data.privateKey }
-              : wallet
-          )
-        );
-        console.log(data);
-        setVisibleKeys((prev) => ({ ...prev, [walletId]: true }));
-        setPasswordInputs((prev) => {
-          const updated = { ...prev };
-          delete updated[walletId];
-          return updated;
-        });
-      } else {
-        alert(data.message || "Incorrect password");
-      }
-    } catch (err) {
-      alert("Failed to verify password");
-    } finally {
-      setVerifyingPassword((prev) => ({ ...prev, [walletId]: false }));
-    }
-  };
-
-  const toggleKeyVisibility = (walletId) => {
-    if (visibleKeys[walletId]) {
-      // Hide the key
-      setVisibleKeys((prev) => ({ ...prev, [walletId]: false }));
-      // Clear the private key from state for security
-      setWallets((prev) =>
-        prev.map((wallet) =>
-          wallet._id === walletId
-            ? { ...wallet, privateKey: undefined }
-            : wallet
-        )
-      );
-    } else {
-      // Show password input
-      setPasswordInputs((prev) => ({ ...prev, [walletId]: "" }));
-    }
-  };
-
   // Copy to clipboard function
-  const copyToClipboard = async (text, walletId, field) => {
+  const copyToClipboard = async (text, walletId) => {
     try {
       await navigator.clipboard.writeText(text);
-      const copyKey = `${walletId}-${field}`;
-      setCopiedStates((prev) => ({ ...prev, [copyKey]: true }));
+      setCopiedStates((prev) => ({ ...prev, [walletId]: true }));
       setTimeout(() => {
-        setCopiedStates((prev) => ({ ...prev, [copyKey]: false }));
+        setCopiedStates((prev) => ({ ...prev, [walletId]: false }));
       }, 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
@@ -118,9 +59,8 @@ export default function Home() {
   };
 
   // Format address for display (show first and last characters)
-  const formatAddress = (address, isVisible = true) => {
+  const formatAddress = (address) => {
     if (!address) return "";
-    if (!isVisible) return "••••••••••••••••••••••••";
     if (address.length <= 20) return address;
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
@@ -162,6 +102,11 @@ export default function Home() {
     });
   };
 
+  // Handle wallet click
+  const handleWalletClick = (walletId) => {
+    router.push(`/wallet/${walletId}`);
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -178,17 +123,19 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900 text-white p-6">
       {/* Header with Add Wallet Button */}
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-700">
+        <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-700 gap-3">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Wallet className="w-8 h-8" />
             Purse
           </h1>
+          <div className="flex-1"></div>
           <Link href="/add-wallet">
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
               <Plus className="w-5 h-5" />
-              Add Wallet
+              <p className="hidden sm:block">Add Wallet</p>
             </button>
           </Link>
+          <Logout />
         </div>
 
         {/* Wallet Stats */}
@@ -220,17 +167,18 @@ export default function Home() {
             return (
               <div
                 key={wallet._id}
-                className={`bg-gray-800 rounded-xl p-6 border ${styles.borderColor} hover:border-gray-600 transition-all duration-200 hover:shadow-lg`}
+                onClick={() => handleWalletClick(wallet._id)}
+                className={`bg-gray-800 rounded-xl p-6 border ${styles.borderColor} hover:border-gray-600 transition-all duration-200 hover:shadow-lg cursor-pointer`}
               >
                 {/* Wallet Header */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-4 relative">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-12 h-12 rounded-full ${styles.bgColor} flex items-center justify-center text-white text-xl font-bold`}
                     >
                       {styles.icon}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-semibold text-lg">{wallet.name}</h3>
                       <span
                         className={`text-sm ${styles.textColor} capitalize`}
@@ -256,122 +204,19 @@ export default function Home() {
                       {formatAddress(wallet.publicKey)}
                     </span>
                     <button
-                      onClick={() =>
-                        copyToClipboard(wallet.publicKey, wallet._id, "public")
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent wallet click
+                        copyToClipboard(wallet.publicKey, wallet._id);
+                      }}
                       className="ml-2 text-gray-400 hover:text-white transition-colors"
                       title="Copy public key"
                     >
-                      {copiedStates[`${wallet._id}-public`] ? (
+                      {copiedStates[wallet._id] ? (
                         <Check className="w-4 h-4 text-green-500" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
                     </button>
-                  </div>
-                </div>
-
-                {/* Private Key */}
-                <div>
-                  <label className="text-xs text-gray-400 uppercase tracking-wider">
-                    Private Key
-                  </label>
-
-                  {/* Password Input (shown when eye is clicked but key not yet visible) */}
-                  {passwordInputs[wallet._id] !== undefined &&
-                    !visibleKeys[wallet._id] && (
-                      <div className="mt-2 mb-2">
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handlePasswordSubmit(
-                              wallet._id,
-                              passwordInputs[wallet._id]
-                            );
-                          }}
-                          className="flex gap-2"
-                        >
-                          <input
-                            type="password"
-                            placeholder="Enter password"
-                            value={passwordInputs[wallet._id]}
-                            onChange={(e) =>
-                              setPasswordInputs((prev) => ({
-                                ...prev,
-                                [wallet._id]: e.target.value,
-                              }))
-                            }
-                            className="flex-1 bg-gray-700 text-white px-3 py-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            autoFocus
-                            disabled={verifyingPassword[wallet._id]}
-                          />
-                          <button
-                            type="submit"
-                            disabled={verifyingPassword[wallet._id]}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-3 py-1 rounded text-sm transition-colors"
-                          >
-                            {verifyingPassword[wallet._id] ? "..." : "Unlock"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPasswordInputs((prev) => {
-                                const updated = { ...prev };
-                                delete updated[wallet._id];
-                                return updated;
-                              })
-                            }
-                            className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </form>
-                      </div>
-                    )}
-
-                  {/* Private Key Display */}
-                  <div className="mt-1 flex items-center justify-between bg-gray-700/50 rounded-lg px-3 py-2">
-                    <span className="font-mono text-sm truncate">
-                      {visibleKeys[wallet._id] && wallet.privateKey
-                        ? formatAddress(wallet.privateKey)
-                        : "••••••••••••••••••••••••"}
-                    </span>
-                    <div className="flex items-center gap-2 ml-2">
-                      {visibleKeys[wallet._id] && wallet.privateKey && (
-                        <button
-                          onClick={() =>
-                            copyToClipboard(
-                              wallet.privateKey,
-                              wallet._id,
-                              "private"
-                            )
-                          }
-                          className="text-gray-400 hover:text-white transition-colors"
-                          title="Copy private key"
-                        >
-                          {copiedStates[`${wallet._id}-private`] ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => toggleKeyVisibility(wallet._id)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                        title={
-                          visibleKeys[wallet._id]
-                            ? "Hide private key"
-                            : "Show private key"
-                        }
-                      >
-                        {visibleKeys[wallet._id] ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>

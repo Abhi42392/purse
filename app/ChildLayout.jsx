@@ -21,10 +21,7 @@ function AuthWrapper({ children }) {
 const ChildLayout = ({ children }) => {
   return (
     <AuthProvider>
-      <AuthWrapper>
-        {children}
-        <Logout />
-      </AuthWrapper>
+      <AuthWrapper>{children}</AuthWrapper>
     </AuthProvider>
   );
 };

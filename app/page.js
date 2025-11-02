@@ -387,10 +387,12 @@ export default function Home() {
             <p className="text-gray-400 mb-6">
               Get started by adding your first wallet
             </p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition-colors">
-              <Plus className="w-5 h-5" />
-              Add Your First Wallet
-            </button>
+            <Link href="/add-wallet">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition-colors">
+                <Plus className="w-5 h-5" />
+                Add Your First Wallet
+              </button>
+            </Link>
           </div>
         )}
       </div>

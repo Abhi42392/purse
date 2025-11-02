@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Eye, EyeOff, Plus, Wallet, Copy, Check } from "lucide-react";
 import { AuthContext } from "./context/AuthContext";
 import Link from "next/link";
+import Loading from "./components/Loading";
 
 export default function Home() {
   const [wallets, setWallets] = useState([]);
@@ -162,11 +163,7 @@ export default function Home() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {

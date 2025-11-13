@@ -3,7 +3,6 @@ import React, { useContext } from "react";
 import AuthProvider, { AuthContext } from "./context/AuthContext";
 import Login from "./components/Login";
 import Loading from "./components/Loading";
-import Logout from "./components/Logout";
 import Mnemonic from "./components/Mnemonic";
 function AuthWrapper({ children }) {
   const { userData, loading } = useContext(AuthContext);

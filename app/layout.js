@@ -1,6 +1,7 @@
-import { Geist,Geist_Mono} from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChildLayout from "./ChildLayout";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,16 +18,14 @@ export const metadata = {
   description: "Wallet for all crypto currencies",
 };
 
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
-        <ChildLayout>
-          {children}
-        </ChildLayout>        
+        <ChildLayout>{children}</ChildLayout>
+        <SpeedInsights />
       </body>
     </html>
   );

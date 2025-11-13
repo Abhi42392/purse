@@ -16,8 +16,10 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchWalletInfo();
-  }, []);
+    if (userData) {
+      fetchWalletInfo();
+    }
+  }, [userData]);
 
   const fetchWalletInfo = async () => {
     try {

@@ -53,8 +53,7 @@ export async function POST(request) {
       {
         userId: user._id.toString(),
       },
-      JWT_SECRET,
-      { expiresIn: "7d" }
+      JWT_SECRET
     );
 
     // Prepare user response (exclude password)
